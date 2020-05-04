@@ -56,9 +56,18 @@ def deploy_data(data_json):
     file = s3.Object('wb-fa-site', 'data.json')
     file.put(Body=json.dumps(data_json))
 
-detected_faces = detect_faces()
-detected_id_list = create_detected_id_list(detected_faces)
-compare_result = compare_images(detected_id_list)
-data_json = generate_data_json(compare_result)
-deploy_data(data_json)
-print(json.dumps(data_json, indent=2))
+
+def delete_collection_image(id_list):
+    client.delete_faces(
+        CollectionId='faces',
+        FaceIds=id_list
+    )
+
+def main(event, context):
+    detected_faces = detect_faces()
+    detected_id_list = create_detected_id_list(detected_faces)
+    compare_result = compare_images(detected_id_list)
+    data_json = generate_data_json(compare_result)
+    deploy_data(data_json)
+    delete_collection_image(detected_id_list)
+    print(json.dumps(data_json, indent=2))
